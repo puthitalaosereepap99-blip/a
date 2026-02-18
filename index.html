@@ -1,0 +1,238 @@
+import React, { useState, useEffect } from 'react';
+import { Coffee, Clock, CheckCircle, ChevronRight, X, ShoppingCart, User, Terminal } from 'lucide-react';
+
+const App = () => {
+  const [view, setView] = useState('menu'); // 'menu', 'cart', 'status', 'admin'
+  const [cart, setCart] = useState([]);
+  const [orders, setOrders] = useState([
+    { id: '101', item: 'เอสเพรสโซ่เย็น', status: 'กำลังชง', time: '5 นาทีที่แล้ว' },
+    { id: '102', item: 'ชาไทยร้อน', status: 'รอคิว', time: '2 นาทีที่แล้ว' }
+  ]);
+
+  const menuItems = [
+    { id: 1, name: 'เอสเพรสโซ่', price: 50, category: 'Coffee', image: '☕' },
+    { id: 2, name: 'ลาเต้', price: 60, category: 'Coffee', image: '🥛' },
+    { id: 3, name: 'อเมริกาโน่', price: 55, category: 'Coffee', image: '⬛' },
+    { id: 4, name: 'ชาไทย', price: 45, category: 'Tea', image: '🟧' },
+    { id: 5, name: 'ชาเขียวมัทฉะ', price: 65, category: 'Tea', image: '🟩' },
+    { id: 6, name: 'โกโก้', price: 55, category: 'Cocoa', image: '🍫' },
+  ];
+
+  const addToCart = (item) => {
+    const orderItem = {
+      ...item,
+      orderId: Math.random().toString(36).substr(2, 5).toUpperCase(),
+      options: { type: 'เย็น', sweet: '100%' }
+    };
+    setCart([...cart, orderItem]);
+    setView('cart');
+  };
+
+  const placeOrder = () => {
+    const newOrders = cart.map(item => ({
+      id: item.orderId,
+      item: `${item.name}${item.options.type}`,
+      status: 'รอคิว',
+      time: 'เมื่อสักครู่'
+    }));
+    setOrders([...newOrders, ...orders]);
+    setCart([]);
+    setView('status');
+  };
+
+  const updateStatus = (id, newStatus) => {
+    setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-50 text-stone-800 font-sans pb-20">
+      {/* Header */}
+      <header className="bg-orange-800 text-white p-6 shadow-md rounded-b-3xl">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Coffee Assistant</h1>
+            <p className="text-orange-200 text-sm">ยินดีต้อนรับสู่ร้านกาแฟของเรา</p>
+          </div>
+          <button 
+            onClick={() => setView('admin')}
+            className="p-2 bg-orange-700 rounded-full hover:bg-orange-600 transition"
+          >
+            <Terminal size={20} />
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="p-4 max-w-md mx-auto">
+        
+        {/* VIEW: MENU */}
+        {view === 'menu' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mt-2">
+              <h2 className="text-xl font-bold">เมนูเครื่องดื่ม</h2>
+              <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">6 รายการ</span>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
+              {menuItems.map(item => (
+                <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 flex items-center justify-between hover:shadow-md transition">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl">
+                      {item.image}
+                    </div>
+                    <div>
+                      <h3 className="font-bold">{item.name}</h3>
+                      <p className="text-stone-500 text-sm">{item.price} บาท</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => addToCart(item)}
+                    className="bg-orange-100 text-orange-700 p-2 rounded-lg hover:bg-orange-200"
+                  >
+                    <ShoppingCart size={20} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* VIEW: CART/ORDER CONFIRM */}
+        {view === 'cart' && (
+          <div className="space-y-6">
+            <button onClick={() => setView('menu')} className="flex items-center text-stone-500 text-sm">
+              <X size={16} className="mr-1" /> ยกเลิก
+            </button>
+            <h2 className="text-2xl font-bold">ยืนยันออเดอร์</h2>
+            {cart.map((item, idx) => (
+              <div key={idx} className="bg-white p-6 rounded-3xl shadow-sm border border-orange-100">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-orange-900">{item.name}</h3>
+                    <p className="text-orange-700">{item.price} บาท</p>
+                  </div>
+                  <span className="text-3xl">{item.image}</span>
+                </div>
+                
+                <div className="space-y-4 pt-4 border-t border-stone-100">
+                  <div>
+                    <p className="text-sm font-semibold mb-2 text-stone-400">เลือกประเภท</p>
+                    <div className="flex space-x-2">
+                      {['ร้อน', 'เย็น', 'ปั่น'].map(t => (
+                        <button key={t} className={`px-4 py-2 rounded-xl text-sm ${t === 'เย็น' ? 'bg-orange-800 text-white' : 'bg-stone-100'}`}>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold mb-2 text-stone-400">ระดับความหวาน</p>
+                    <div className="flex space-x-2">
+                      {['0%', '50%', '100%'].map(s => (
+                        <button key={s} className={`px-4 py-2 rounded-xl text-sm ${s === '100%' ? 'bg-orange-800 text-white' : 'bg-stone-100'}`}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <button 
+              onClick={placeOrder}
+              className="w-full bg-orange-800 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-orange-200 active:scale-95 transition"
+            >
+              สั่งเครื่องดื่มเลย
+            </button>
+          </div>
+        )}
+
+        {/* VIEW: STATUS */}
+        {view === 'status' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold mt-2">ติดตามสถานะ</h2>
+            <div className="space-y-4">
+              {orders.length === 0 ? (
+                <div className="text-center py-10 text-stone-400">ยังไม่มีรายการสั่งซื้อ</div>
+              ) : (
+                orders.map(order => (
+                  <div key={order.id} className="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-orange-500">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">คิวที่ #{order.id}</span>
+                        <h3 className="font-bold text-lg">{order.item}</h3>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        order.status === 'เสร็จแล้ว' ? 'bg-green-100 text-green-700' : 
+                        order.status === 'กำลังชง' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {order.status}
+                      </div>
+                    </div>
+                    <div className="flex items-center mt-3 text-stone-400 text-xs">
+                      <Clock size={12} className="mr-1" />
+                      {order.time}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* VIEW: ADMIN (For the shop assistant to update status) */}
+        {view === 'admin' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">หน้าจัดการหลังร้าน</h2>
+              <button onClick={() => setView('menu')} className="text-sm text-orange-700">กลับหน้าเมนู</button>
+            </div>
+            <div className="space-y-4">
+              {orders.map(order => (
+                <div key={order.id} className="bg-white p-4 rounded-xl border border-stone-200">
+                  <div className="flex justify-between mb-3">
+                    <span className="font-bold">คิว {order.id}: {order.item}</span>
+                    <span className="text-sm text-stone-500">{order.status}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button onClick={() => updateStatus(order.id, 'รอคิว')} className="text-[10px] bg-stone-100 py-1 rounded">รอคิว</button>
+                    <button onClick={() => updateStatus(order.id, 'กำลังชง')} className="text-[10px] bg-blue-100 text-blue-700 py-1 rounded">กำลังชง</button>
+                    <button onClick={() => updateStatus(order.id, 'เสร็จแล้ว')} className="text-[10px] bg-green-100 text-green-700 py-1 rounded">เสร็จแล้ว</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 px-6 py-3 flex justify-around items-center z-50">
+        <button 
+          onClick={() => setView('menu')}
+          className={`flex flex-col items-center ${view === 'menu' ? 'text-orange-800' : 'text-stone-400'}`}
+        >
+          <Coffee size={24} />
+          <span className="text-[10px] mt-1 font-bold">เมนู</span>
+        </button>
+        <button 
+          onClick={() => setView('status')}
+          className={`flex flex-col items-center ${view === 'status' ? 'text-orange-800' : 'text-stone-400'}`}
+        >
+          <Clock size={24} />
+          <span className="text-[10px] mt-1 font-bold">สถานะ</span>
+        </button>
+        <button 
+          className="flex flex-col items-center text-stone-400"
+          onClick={() => alert("ระบบสมาชิกกำลังจะมาเร็วๆ นี้!")}
+        >
+          <User size={24} />
+          <span className="text-[10px] mt-1 font-bold">โปรไฟล์</span>
+        </button>
+      </nav>
+    </div>
+  );
+};
+
+export default App;
